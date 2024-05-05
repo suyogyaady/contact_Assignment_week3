@@ -21,6 +21,7 @@ connectDatabase();
 // configuring Routes of User
 app.use('/api/contact', require('./routes/contactRoutes'))
 app.use('/api/reservation', require('./routes/reservationRoutes'))
+app.use("/api/book-appointment", require("./routes/appointmentRoutes"));
 
 //making test endpoint
 app.listen(PORT, ()=>{

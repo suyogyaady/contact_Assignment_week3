@@ -1,60 +1,58 @@
-const reservationModel=require('../model/reservationModel')
+
+const reservationModel = require("../model/reservationModel");
 
 const addReservation = async (req, res) => {
-    console.log(req.body);
+  console.log(req.body);
 
-    const{userId, eventDate, numberOfGuests} = req.body;
+  const { userId, eventDate, numberOfGuests } = req.body;
 
-    // Get the current date
-    var currentDate = new Date();
+  if (!userId || !eventDate || !numberOfGuests) {
+    return res.json({
+      success: false,
+      message: "Please enter all fields!",
+    });
+  }
 
-    // Create a new date object for your target date
-    var targetDate = new Date(eventDate);
+  if (numberOfGuests < 0) {
+    return res.json({
+      success: false,
+      message: "Please enter positive guests no.",
+    });
+  }
 
-    // check validation
-    if (targetDate>currentDate & numberOfGuests < 0 ) {
-        // res.send("Please enter all fields!")
-        return res.json({
-            "success": false,
-            "message": "Error(Invalid fields)"
-        })
-    }
-    
+  var currentDate = new Date();
+  var date = new Date(eventDate);
+  // console.log(currentDate);
+  if (currentDate > date) {
+    return res.json({
+      success: false,
+      message: "Please enter correct date",
+    });
+  }
 
-    try {
+  try {
+    const newReservation = new reservationModel({
+      userId: userId,
+      eventDate: date,
+      numberOfGuests: numberOfGuests,
+    });
 
-       
-        // 5.2 if user is new:
+    await newReservation.save();
 
-        const newReservation = new reservationModel({
-            //Database Fields  : Client's Value
-            userId: userId,
-            eventDate: eventDate,
-            numberOfGuests: numberOfGuests,
-        })
-
-        // Save to database
-        await newReservation.save()
-
-        // send the respose
-        res.json({
-            "success": true,
-            "message": `New reservation at ${eventDate} with ${numberOfGuests} guests reserved Successfully!`
-        })
-
-        // 5.2.1 Hash the password
-        // 5.2.2 Save to the database
-        // 5.2.3 Send Successful response
-
-    } catch (error) {
-        console.log(error)
-        res.json({
-            "success": false,
-            "message": "Reservation details error"
-        })
-    }
-
+    return res.json({
+      success: true,
+      message: `User: ${userId} has reserved event for ${numberOfGuests} guests at date ${date} `,
+    });
+  } catch (error) {
+    return res.json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
+
 module.exports = {
-    addReservation,
+  addReservation,
 };
+
+
